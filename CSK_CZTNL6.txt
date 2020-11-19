@@ -1,0 +1,79 @@
+1. feladat
+#Bővítse az Alkatresz táblát egy új ár mezővel
+ALTER TABLE Alkatresz
+ADD ar int;
+
+#Mely gyártónak nincs terméke
+SELECT 
+	GYARTO.NEV
+FROM 
+	GYARTO
+WHERE GYARTO.NEV NOT IN (SELECT GYARTO FROM TERMEK
+GROUP BY GYARTO) 
+
+#Növelje meg az X kódú alkatrészt tartalmazó termékek árát 10%-kal
+UPDATE TERMEK
+SET EAR = EAR * 1.1
+WHERE NEV IN 
+		(
+		SELECT TERMEK
+		 FROM  KOMPNENS
+		WHERE KOMPONENS.ALKATRESZ LIKE '%X%'
+		)
+
+#Mely termékhez áll rendelkezésre a legtöbb egység
+SELECT * FROM
+	(SELECT SUM(DB),  EGYSEG.ARU
+	EGYSEG, TERMEK
+	WHERE
+	EGYSEG.ARU = TERMEK.TKOD
+	GROUP BY EGYSEG.ARU
+	ORDER BY 1 DESC) OSSZDB
+WHERE ROWNUM = 1
+
+2.FELADAT
+
+#A tanfolyam típusonként az átlagár és az ár értéktartomány nagysága
+SELECT  
+	AVG(AR),
+	MIN(AR),
+	MAX(AR)
+	FROM TANFOLYAM
+	GROUP BY TKOD
+	
+#Irja ki a tanfolyam nevét és hogy drága (ar > 100000) vagy olcsó
+SELECT 
+	MEGNEVEZES, 'drága',
+	FROM TANFOLYAM
+	WHERE AR>10000
+	UNION ALL
+	SELECT 
+	MEGNEVEZES, 'olcsó'
+	FROM TANFOLYAM
+	WHERE AR <10000
+	
+	
+#Irja ki a tanfolyam nevét és hogy sokan (db > 10) vagy kevesen vesznek részt rajta
+SELECT
+	MEGNEVEZES 'sokan'
+	FROM TANFOLYAM
+	WHERE tkod>10
+	UNION ALL
+	SELECT
+	MEGNEVEZES 'kevesen',
+	FROM TANFOLYAM
+	WHERE tkod <= 10
+
+3.FELADAT
+
+#SQL parancsokat, melyek révén a N:M kapcsolat lesz
+SELECT TERMEK.gyarto,GYARTO.nev FROM TERMEK CROSS JOIN GYARTO
+
+4.FELADAT 
+
+ALTER TABLE TERMEK
+ADD kategoria C(10);
+
+SELECT DISTINCT nev
+FROM GYARTO
+WHERE
